@@ -6,12 +6,12 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const { sid, nickname } = req.body;
-    if (!sid || !nickname) {
+    const { sid, provider } = req.body;
+    if (!sid || !provider) {
       return res.status(400).json({ error: "옳바르지 않은 값입니다." });
     }
     const secretSaltKey = process.env.SALT;
-    const password = `${nickname}${sid}${secretSaltKey}`;
+    const password = `${provider}${sid}${secretSaltKey}`;
     const hashPassword = await argon2.hash(password);
 
     res.status(200).json({ data: hashPassword });
