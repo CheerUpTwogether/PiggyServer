@@ -10,12 +10,12 @@ app.use(express.json());
 // 비밀번호 암호화
 app.post("/hash", async (req, res) => {
   try {
-    const { sid, nickname } = req.body;
-    if (!sid || !nickname) {
+    const { sid, provider } = req.body;
+    if (!sid || !provider) {
       return res.status(400).json({ error: "옳바르지 않은 값입니다." });
     }
     const secretSaltKey = process.env.SALT;
-    const password = `${nickname}${sid}${secretSaltKey}`;
+    const password = `${provider}${sid}${secretSaltKey}`;
     const hashPassword = await argon2.hash(password);
 
     res.status(200).json({ data: hashPassword });
@@ -28,12 +28,12 @@ app.post("/hash", async (req, res) => {
 // 비밀번호 인증
 app.post("/vertify", async (req, res) => {
   try {
-    const { sid, nickname, hash } = req.body;
-    if (!sid || !nickname) {
+    const { sid, provider, hash } = req.body;
+    if (!sid || !provider) {
       return res.status(400).json({ error: "옳바르지 않은 값입니다." });
     }
     const secretSaltKey = process.env.SALT;
-    const password = `${nickname}${sid}${secretSaltKey}`;
+    const password = `${provider}${sid}${secretSaltKey}`;
     const isMatch = await argon2.verify(hash, password);
 
     res.status(200).json({ data: isMatch });
