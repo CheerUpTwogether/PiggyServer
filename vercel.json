@@ -6,14 +6,5 @@
       "use": "@vercel/node"
     }
   ],
-  "routes": [
-    {
-      "src": "/hash",
-      "dest": "/api/hash.js"
-    },
-    {
-      "src": "/vertify",
-      "dest": "/api/vertify.js"
-    }
-  ]
+  "routes": []
 }
