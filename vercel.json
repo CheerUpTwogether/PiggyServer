@@ -4,6 +4,10 @@
     {
       "src": "api/**/*.js",
       "use": "@vercel/node"
+    },
+    {
+      "src": "public/**/*",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
@@ -14,6 +18,7 @@
     {
       "src": "/vertify",
       "dest": "/api/vertify.js"
-    }
+    },
+    { "src": "/mapHtml", "dest": "/public/map.html" }
   ]
 }
