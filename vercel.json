@@ -11,5 +11,11 @@
     }
   ],
 
-  "routes": [{ "src": "/mapHtml", "dest": "/public/map.html" }]
+  "routes": [
+    {
+      "src": "/sendNotification",
+      "dest": "/api/sendNotification.js"
+    },
+    { "src": "/mapHtml", "dest": "/public/map.html" }
+  ]
 }
