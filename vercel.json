@@ -10,15 +10,6 @@
       "use": "@vercel/static"
     }
   ],
-  "routes": [
-    {
-      "src": "/hash",
-      "dest": "/api/hash.js"
-    },
-    {
-      "src": "/vertify",
-      "dest": "/api/vertify.js"
-    },
-    { "src": "/mapHtml", "dest": "/public/map.html" }
-  ]
+
+  "routes": [{ "src": "/mapHtml", "dest": "/public/map.html" }]
 }
