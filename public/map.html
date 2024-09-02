@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>카카오 지도</title>
+    <script
+      type="text/javascript"
+      src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=d1d8c417e1fa8ea47c30bfc0279fefd2&libraries=services,clusterer,drawing"
+    ></script>
+    <style>
+      #map {
+        width: 100%;
+        height: 100vh;
+      }
+      .markWrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 1px #aaa solid;
+        background: white;
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+      }
+      .markImg {
+        border-radius: 50%;
+        width: 80%;
+        height: 80%;
+      }
+      .placeMarkImg {
+        width: 80px;
+        height: 80px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+      var myData = {
+        name: "Unknown",
+        LatLng: new kakao.maps.LatLng(0, 0),
+        url: "./assets/image/basicProfile.svg",
+        elemnet: null,
+      };
+
+      var mapContainer = document.getElementById("map");
+      var mapOption = {
+        center: new kakao.maps.LatLng(0, 0),
+        level: 1, // 줌 레벨
+      };
+
+      var map = new kakao.maps.Map(mapContainer, mapOption);
+
+      // 나의 마커 생성.
+      var myMarker = new kakao.maps.CustomOverlay({
+        position: myData.LatLng,
+        content: `<div class="markWrapper" onclick="toggleClick(this)">
+              <img class="markImg" src="${myData.url}" alt="${myData.name}"/>
+              </div>
+              `,
+        // xAnchor: 0.3,
+        // yAnchor: 0.91
+      });
+
+      // 나의 마커가 지도 위에 표시되도록 설정
+      myMarker.setMap(map);
+
+      // 장소 마커 생성.
+      var marker = new kakao.maps.CustomOverlay({
+        position: new kakao.maps.LatLng(0, 0),
+        content: `<img class="placeMarkImg" src="./assets/icon/placeMark.png" alt="Not Found Image" onclick="handlePlaceMarkClick()"/>`,
+        // xAnchor: 0.3,
+        // yAnchor: 0.91
+      });
+
+      // 장소 마커가 지도 위에 표시되도록 설정
+      marker.setMap(map);
+
+      function handlePlaceMarkClick(event) {
+        const markerLat = marker.getPosition().getLat();
+        const markerLng = marker.getPosition().getLng();
+        map.setCenter(new kakao.maps.LatLng(markerLat, markerLng));
+        map.setLevel(1);
+      }
+
+      // 장소 위 경도 설정 함수
+      function setPlacePosition(latitude, longitude) {
+        const locPosition = new kakao.maps.LatLng(latitude, longitude);
+        marker.setPosition(locPosition);
+        map.setCenter(locPosition);
+        map.setLevel(1);
+      }
+
+      // 내 위 경도 설정 함수
+      function setMyPosition(latitude, longitude) {
+        const locPosition = new kakao.maps.LatLng(latitude, longitude);
+        myMarker.setPosition(locPosition);
+        map.setCenter(locPosition);
+        map.setLevel(1);
+      }
+
+      // 내 메타데이터 설정 함수
+      function setMyMetaData(name, url) {
+        myData.name = name;
+        myData.url = url;
+      }
+
+      // ios 에선 window 가 최상위 객체
+      //   window.addEventListener('message', function (event) {
+      document.addEventListener("message", function (event) {
+        const data = JSON.parse(event.data);
+        const keys = Object.keys(data);
+        keys.forEach((key) => {
+          switch (key) {
+            case "myMetaData":
+              setMyMetaData(data.myMetaData.nickname, data.myMetaData.url);
+              break;
+            case "myLocationData":
+              setMyPosition(
+                data.myLocationData.latitude,
+                data.myLocationData.longitude
+              );
+              break;
+            case "placeData":
+              setPlacePosition(
+                data.placeData.latitude,
+                data.placeData.longitude
+              );
+              break;
+            default:
+              break;
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
