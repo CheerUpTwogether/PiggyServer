@@ -51,8 +51,9 @@ async function scheduleNotification(messagePayload) {
 }
 
 app.post("/sendNotification", async (req, res) => {
+ 
   const { id, message, time } = req.body;
-
+ 
   // Supabase에서 디바이스 토큰 조회
   const { data, error } = await supabase
     .from("users_nickname")
