@@ -1,4 +1,6 @@
 /node_modules
+/httpsKey
+/config
 .env
 .vercel
 firebaseAdmin.json

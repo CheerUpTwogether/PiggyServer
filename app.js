@@ -19,6 +19,17 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 
+// fs and https 모듈 가져오기
+const https = require("https");
+const fs = require("fs");
+
+// HTTPS 인증관련
+var privateKey = fs.readFileSync("/etc/letsencrypt/live/www.piggynative.kro.kr/privkey.pem")
+var certificate = fs.readFileSync("/etc/letsencrypt/live/www.piggynative.kro.kr/cert.pem")
+var ca = fs.readFileSync("/etc/letsencrypt/live/www.piggynative.kro.kr/chain.pem")
+const credentials = { key: privateKey, cert: certificate, ca: ca }
+
+
 const app = express();
 const port = 3000;
 
@@ -34,7 +45,7 @@ async function scheduleNotification(messagePayload) {
   }
 }
 
-app.post("/schedule-notification", async (req, res) => {
+app.post("/sendNotification", async (req, res) => {
   const { id, message, time } = req.body;
 
   // 타임 문자열을 Date 객체로 변환
@@ -93,7 +104,13 @@ app.get("/mapHtml", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "map.html"));
 });
 
-// 서버 시작
+// http 서버 시작
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
 });
+
+// https 의존성으로 certificate와 private key로 새로운 서버를 시작
+https.createServer(credentials, app).listen(8080, () => {
+  console.log(`HTTPS server started on port 8080`);
+});
+
