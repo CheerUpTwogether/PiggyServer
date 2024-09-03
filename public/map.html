@@ -39,7 +39,7 @@
       var myData = {
         name: "Unknown",
         LatLng: new kakao.maps.LatLng(0, 0),
-        url: "/public/assets/image/basicProfile.svg",
+        url: "./assets/image/basicProfile.svg",
         elemnet: null,
       };
 
@@ -68,7 +68,7 @@
       // 장소 마커 생성.
       var marker = new kakao.maps.CustomOverlay({
         position: new kakao.maps.LatLng(37.579617, 126.977041),
-        content: `<img class="placeMarkImg" src="/public/assets/icon/placeMark.png" alt="Not Found Image" onclick="handlePlaceMarkClick()"/>`,
+        content: `<img class="placeMarkImg" src="./assets/icon/placeMark.png" alt="Not Found Image" onclick="handlePlaceMarkClick()"/>`,
         // xAnchor: 0.3,
         // yAnchor: 0.91
       });
