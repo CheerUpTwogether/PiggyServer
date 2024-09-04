@@ -3,6 +3,7 @@ import express from "express";
 import https from "https";
 import fs from "fs";
 import path from "path";
+import {fileURLToPath} from "url";
 import cors from "cors";
 import admin from "firebase-admin";
 import { createClient } from "@supabase/supabase-js";
@@ -42,6 +43,10 @@ app.use(express.json());
 
 app.use(notificationRouter);
 
+// 현재 모듈의 파일 경로를 가져오기
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // 정적 파일 제공 설정
 app.use(express.static(path.join(__dirname, "public")));
 
@@ -59,3 +64,5 @@ app.listen(port, () => {
 https.createServer(credentials, app).listen(8080, () => {
   console.log(`HTTPS server started on port 8080`);
 });
+
+export default admin;
