@@ -1,6 +1,7 @@
 import express from "express";
 import schedule from "node-schedule";
-import admin, {supabase} from "../app.js";
+import admin, { supabase } from "../app.js";
+
 const router = express.Router();
 
 // 알림 보내는 함수

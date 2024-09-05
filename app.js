@@ -7,8 +7,11 @@ import {fileURLToPath} from "url";
 import cors from "cors";
 import admin from "firebase-admin";
 import { createClient } from "@supabase/supabase-js";
+import axios from 'axios';
+import jwt from 'jsonwebtoken';
 import serviceAccount from "./firebaseAdmin.json" assert { type: "json" };
 import notificationRouter from "./routers/sendNotification.js";
+import giftRouter from "./routers/sendGift.js";
 //환경 변수 세팅
 dotenv.config();
 
@@ -24,24 +27,39 @@ admin.initializeApp({
 });
 
 // HTTPS 인증관련
-var privateKey = fs.readFileSync(
-  "/etc/letsencrypt/live/www.piggynative.kro.kr/privkey.pem"
-);
-var certificate = fs.readFileSync(
-  "/etc/letsencrypt/live/www.piggynative.kro.kr/cert.pem"
-);
-var ca = fs.readFileSync(
-  "/etc/letsencrypt/live/www.piggynative.kro.kr/chain.pem"
-);
+var privateKey = fs.readFileSync(process.env.HTTPS_PRIVATE_KEY);
+var certificate = fs.readFileSync(process.env.HTTPS_CERT_KEY);
+var ca = fs.readFileSync(process.env.HTTPS_CA_KEY);
 const credentials = { key: privateKey, cert: certificate, ca: ca };
+
+const authenticateToken = async (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; // "Bearer <token>"
+
+  if (token == null) return res.sendStatus(401);
+
+  try {
+    // Supabase의 인증 기능을 사용하여 토큰 검증
+    const { data: user, error } = await supabase.auth.getUser(token);
+
+    if (error || !user) return res.sendStatus(403);
+   
+    req.user = user;
+    next();
+  } catch (err) {
+    console.error(err);
+    res.sendStatus(500);
+  }
+};
 
 const app = express();
 const port = 3000;
 
+app.use(express.json())
 app.use(cors()); // CORS 미들웨어 사용
-app.use(express.json());
-
+app.use(authenticateToken);
 app.use(notificationRouter);
+app.use(giftRouter);
 
 // 현재 모듈의 파일 경로를 가져오기
 const __filename = fileURLToPath(import.meta.url);
