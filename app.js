@@ -3,15 +3,16 @@ import express from "express";
 import https from "https";
 import fs from "fs";
 import path from "path";
-import {fileURLToPath} from "url";
+import { fileURLToPath } from "url";
 import cors from "cors";
 import admin from "firebase-admin";
 import { createClient } from "@supabase/supabase-js";
-import axios from 'axios';
-import jwt from 'jsonwebtoken';
+import axios from "axios";
+import jwt from "jsonwebtoken";
 import serviceAccount from "./firebaseAdmin.json" assert { type: "json" };
 import notificationRouter from "./routers/sendNotification.js";
 import giftRouter from "./routers/sendGift.js";
+import smsRouter from "./routers/sendSms.js";
 //환경 변수 세팅
 dotenv.config();
 
@@ -33,8 +34,8 @@ var ca = fs.readFileSync(process.env.HTTPS_CA_KEY);
 const credentials = { key: privateKey, cert: certificate, ca: ca };
 
 const authenticateToken = async (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // "Bearer <token>"
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1]; // "Bearer <token>"
 
   if (token == null) return res.sendStatus(401);
 
@@ -43,7 +44,7 @@ const authenticateToken = async (req, res, next) => {
     const { data: user, error } = await supabase.auth.getUser(token);
 
     if (error || !user) return res.sendStatus(403);
-   
+
     req.user = user;
     next();
   } catch (err) {
@@ -55,11 +56,12 @@ const authenticateToken = async (req, res, next) => {
 const app = express();
 const port = 3000;
 
-app.use(express.json())
+app.use(express.json());
 app.use(cors()); // CORS 미들웨어 사용
 app.use(authenticateToken);
 app.use(notificationRouter);
 app.use(giftRouter);
+app.use(smsRouter);
 
 // 현재 모듈의 파일 경로를 가져오기
 const __filename = fileURLToPath(import.meta.url);
