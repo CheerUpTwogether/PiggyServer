@@ -12,6 +12,7 @@ import jwt from "jsonwebtoken";
 import serviceAccount from "./firebaseAdmin.json" assert { type: "json" };
 import notificationRouter from "./routers/sendNotification.js";
 import giftRouter from "./routers/sendGift.js";
+import smsRouter from "./routers/sendSms.js";
 //환경 변수 세팅
 dotenv.config();
 
@@ -60,6 +61,7 @@ app.use(cors()); // CORS 미들웨어 사용
 app.use(authenticateToken);
 app.use(notificationRouter);
 app.use(giftRouter);
+app.use(smsRouter);
 
 // 현재 모듈의 파일 경로를 가져오기
 const __filename = fileURLToPath(import.meta.url);

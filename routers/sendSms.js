@@ -13,9 +13,9 @@ dotenv.config();
 const router = express.Router();
 
 router.post("/sendSms", async (req, res) => {
-  const { phone, code } = req.body;
-
-  if (!code || !phone) {
+  try{
+  const { phone, content } = req.body;
+  if (!content || !phone) {
     return res.status(404).json({ error: "비어있는 값이 있습니다." });
   }
 
@@ -26,9 +26,8 @@ router.post("/sendSms", async (req, res) => {
   const method = "POST";
   const space = " ";
   const url2 = `/sms/v2/services/${process.env.NAVER_SERVICE_KEY}/messages`;
-  const newLine = "₩n";
+  const newLine = "\n";
   const date = Date.now().toString();
-  const accessKey = process.env.NAVER_ACCESS_KEY;
 
   hmac.update(method);
   hmac.update(space);
@@ -36,27 +35,33 @@ router.post("/sendSms", async (req, res) => {
   hmac.update(newLine);
   hmac.update(date);
   hmac.update(newLine);
-  hmac.update(accessKey);
+  hmac.update(process.env.NAVER_ACCESS_KEY);
 
   const hash = hmac.finalize();
   const signature = hash.toString(CryptoJS.enc.Base64);
 
-  instance.post(
+  await instance.post(
     `/sms/v2/services/${process.env.NAVER_SERVICE_KEY}/messages`,
     {
-      tyle: "SMS",
+      type: "SMS",
       countryCode: "82",
-      from: "01091562464",
-      content: `[Piggy] 본인인증번호는 ${code}입니다.`,
-      messages: [{ to: `${phone}` }],
+      from: process.env.NAVER_PHONE_NUMBER,
+      content: content,
+      messages: [{ to: phone, },],
     },
     {
       headers: {
         "Content-Type": "application/json; charset=utf-8",
         "x-ncp-apigw-timestamp": date,
-        "x-ncp-iam-access-key": accessKey,
+        "x-ncp-iam-access-key": process.env.NAVER_ACCESS_KEY,
         "x-ncp-apigw-signature-v2": signature,
       },
     }
   );
+}catch(e){
+	console.log(e.message);
+}
+
 });
+
+export default router;
