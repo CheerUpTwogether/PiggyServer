@@ -29,32 +29,54 @@ router.post("/sendGift", async (req, res) => {
   }
 
   // Supabase에서템플릿 토큰 조회
-  const { data, error } = await supabase
+  const { data:templateData, error: templateError } = await supabase
     .from("gift_template_info")
     .select("template_token_id, price")
     .eq("template_trace_id", template_trace_id);
-  if (error) {
+  if (templateError) {
     return res
       .status(500)
       .json({ error: "해당 trace Id 의 레코드를 찾을 수없습니다." });
   }
 
-  if (data.length === 0) {
+  if (templateData.length === 0) {
     return res
       .status(412)
       .json({ error: "template Token 조회 결과 또는 권한이 없습니다." });
   }
-  const mypiggy = parseInt(piggyData[0].latest_piggy_count);
-  const price = parseInt(data[0].price);
-  if (mypiggy < price) {
+  const myPiggy = parseInt(piggyData[0].latest_piggy_count);
+  const price = parseInt(templateData[0].price);
+  if (myPiggy < price) {
     return res.status(408).json({ error: "피기 수량 부족." });
+  }
+
+  const { data:piggyChangeData, error: piggyChangeError } = await supabase
+	.from("piggy_changed_log")
+	.insert([{
+	  user_id: myData.user.id,
+	  present_piggy_count: myPiggy,
+	  diff_piggy_count: -price,
+	  changed_category: "구매",
+	  purchase_id: template_trace_id,
+	},]).select("*");
+
+  if (piggyChangeError) {
+    return res
+      .status(500)
+      .json({ error: "상품을 구매하는중 문제가 발생했습니다." });
+  }
+
+  if (piggyChangeData.length === 0) {
+    return res
+      .status(412)
+      .json({ error: "피기 정산 테이블  조회 결과 또는 권한이 없습니다." });
   }
 
   await instance.post(
     "/openapi/giftbiz/v1/template/order",
     {
       receiver_type: "PHONE",
-      template_token: data[0].template_token_id,
+      template_token: templateData[0].template_token_id,
       receivers: [
         {
           receiver_id: phone_number,
@@ -70,7 +92,7 @@ router.post("/sendGift", async (req, res) => {
       },
     }
   );
-  return res.status(200).json({ success: "정상적으로 선물을 발송하였습니다." });
+  return res.status(200).json({ success: "정상적으로 선물을 발송하였습니다.", latest_piggy_count: myPiggy-price  });
 });
 
 export default router;

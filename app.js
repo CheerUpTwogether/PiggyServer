@@ -56,11 +56,12 @@ const authenticateToken = async (req, res, next) => {
 const app = express();
 const port = 3000;
 
+app.use(express.static('public'));
 app.use(express.json());
 app.use(cors()); // CORS 미들웨어 사용
-app.use(authenticateToken);
+//app.use(authenticateToken);
 app.use(notificationRouter);
-app.use(giftRouter);
+app.use(authenticateToken,giftRouter);
 app.use(smsRouter);
 
 // 현재 모듈의 파일 경로를 가져오기
